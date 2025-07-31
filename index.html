@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCQ Game - Data Analyst Revision</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      max-width: 600px;
+      width: 90%;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .score-header {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .options button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #333;
+      background: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .options button:hover {
+      background: #d5f5e3;
+    }
+
+    .lifeline-btn {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .feedback {
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+
+    .result {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="score-header">Max Marks: 30</div>
+    <h2 id="question">Loading...</h2>
+    <div class="options" id="options"></div>
+    <button class="lifeline-btn" onclick="useLifeline()">Use 50/50 Lifeline</button>
+    <div class="feedback" id="feedback"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      // Excel Questions
+      { q: "What is the shortcut for copy in Excel?", a: "Ctrl+C", o: ["Ctrl+X", "Ctrl+V", "Ctrl+C", "Ctrl+Z"] },
+      { q: "Which function sums up values in Excel?", a: "SUM", o: ["ADD", "SUM", "TOTAL", "PLUS"] },
+      { q: "What symbol starts a formula in Excel?", a: "=", o: ["@", "=", "#", "$"] },
+      { q: "Which function returns current date?", a: "TODAY()", o: ["NOW()", "DATE()", "TODAY()", "CURDATE()"] },
+      { q: "Shortcut for Save in Excel?", a: "Ctrl+S", o: ["Ctrl+P", "Ctrl+S", "Ctrl+Z", "Ctrl+F"] },
+      { q: "Merge Cells combines?", a: "Multiple cells into one", o: ["Deletes cells", "Splits cells", "Multiple cells into one", "Formats cells"] },
+      { q: "Which chart is good for trends?", a: "Line Chart", o: ["Pie Chart", "Bar Chart", "Line Chart", "Scatter Chart"] },
+      { q: "Function to count numbers only?", a: "COUNT", o: ["COUNTA", "COUNT", "SUM", "MAX"] },
+      { q: "Pivot Table is used for?", a: "Summarizing data", o: ["Formatting", "Summarizing data", "Charting", "Editing"] },
+      { q: "Cell address A1 means?", a: "Column A, Row 1", o: ["Row A, Column 1", "Column A, Row 1", "Any cell", "Top cell"] },
+
+      // Python Questions
+      { q: "Which keyword is used to define function?", a: "def", o: ["fun", "define", "def", "func"] },
+      { q: "Which of these is a list?", a: "[1,2,3]", o: ["(1,2,3)", "{1,2,3}", "[1,2,3]", "None"] },
+      { q: "How to comment in Python?", a: "#", o: ["//", "#", "--", "/*"] },
+      { q: "Which keyword for loop?", a: "for", o: ["repeat", "loop", "for", "do"] },
+      { q: "Which is not a datatype?", a: "real", o: ["int", "float", "real", "str"] },
+      { q: "How to print in Python?", a: "print()", o: ["echo", "log()", "print()", "show"] },
+      { q: "Which library is used for data?", a: "pandas", o: ["numpy", "pandas", "matplotlib", "os"] },
+      { q: "Which loop runs till condition false?", a: "while", o: ["for", "repeat", "while", "until"] },
+      { q: "Which is a dictionary?", a: "{ 'a':1 }", o: ["[1,2]", "(1,2)", "{ 'a':1 }", "{1,2,3}"] },
+      { q: "Which module handles CSV?", a: "csv", o: ["file", "excel", "csv", "json"] },
+
+      // SQL Questions
+      { q: "Which command is used to retrieve data?", a: "SELECT", o: ["GET", "FETCH", "SELECT", "PULL"] },
+      { q: "Which clause filters rows?", a: "WHERE", o: ["ORDER", "WHERE", "GROUP", "HAVING"] },
+      { q: "Which command deletes rows?", a: "DELETE", o: ["DROP", "DELETE", "REMOVE", "ERASE"] },
+      { q: "SQL stands for?", a: "Structured Query Language", o: ["Simple Query List", "Standard Query Line", "Structured Query Language", "None"] },
+      { q: "Which joins return all records?", a: "FULL OUTER JOIN", o: ["INNER JOIN", "LEFT JOIN", "FULL OUTER JOIN", "RIGHT JOIN"] },
+      { q: "Which function gives max value?", a: "MAX()", o: ["TOP()", "HIGH()", "MAX()", "LARGEST()"] },
+      { q: "Which symbol for all columns?", a: "*", o: ["@", "#", "*", "&"] },
+      { q: "Which clause groups data?", a: "GROUP BY", o: ["ORDER BY", "GROUP BY", "WHERE", "HAVING"] },
+      { q: "Default sort order?", a: "ASC", o: ["DESC", "ASC", "RANDOM", "NONE"] },
+      { q: "Which is a valid aggregate function?", a: "COUNT()", o: ["ADD()", "COUNT()", "SUMS()", "TOTAL()"] }
+    ];
+
+    let index = 0;
+    let score = 0;
+    let lifelineUsed = false;
+
+    function loadQuestion() {
+      const current = questions[index];
+      document.getElementById("question").textContent = `Q${index + 1}: ${current.q}`;
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("options").innerHTML = "";
+      current.o.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => selectAnswer(opt);
+        document.getElementById("options").appendChild(btn);
+      });
+    }
+
+    function selectAnswer(option) {
+      const correct = questions[index].a;
+      let point = 0;
+      if (option === correct) {
+        point = lifelineUsed ? 1 : 2;
+        score += point;
+        document.getElementById("feedback").textContent = `✅ Correct! +${point} points. Great going!`;
+      } else {
+        document.getElementById("feedback").textContent = `❌ Wrong! +0 point.`;
+      }
+      lifelineUsed = false;
+      index++;
+      setTimeout(() => {
+        if (index < questions.length) loadQuestion();
+        else showResult();
+      }, 1500);
+    }
+
+    function useLifeline() {
+      if (lifelineUsed) return;
+      lifelineUsed = true;
+      const current = questions[index];
+      const options = [...current.o];
+      const correct = current.a;
+      const wrongs = options.filter(opt => opt !== correct);
+      const toRemove = wrongs.sort(() => 0.5 - Math.random()).slice(0, 2);
+      document.querySelectorAll(".options button").forEach(btn => {
+        if (toRemove.includes(btn.textContent)) btn.style.display = "none";
+      });
+    }
+
+    function showResult() {
+      const message = score > 25 ? "You are amazing munchkin!" : "You need to study more love";
+      document.getElementById("result").innerHTML = `<h3>Your Score: ${score}/30</h3><p>${message}</p>`;
+      document.getElementById("question").style.display = "none";
+      document.getElementById("options").style.display = "none";
+      document.querySelector(".lifeline-btn").style.display = "none";
+    }
+
+    loadQuestion();
+  </script>
+</body>
+
+</html>
